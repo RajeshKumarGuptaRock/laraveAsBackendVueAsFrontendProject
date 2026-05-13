@@ -1,0 +1,54 @@
+services:
+  backend:
+    build:
+      context: ./backend/blog
+      dockerfile: ../Dockerfile
+
+    container_name: laravel_api
+
+    ports:
+      - "8081:80"
+
+    volumes:
+      - ./backend/blog:/var/www/html
+
+    depends_on:
+      - mysql
+
+
+  mysql:
+    image: mysql:8
+    container_name: laravel_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: laravel
+    ports:
+      - "3308:3306"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: laravel_phpmyadmin
+    restart: always
+    ports:
+      - "8082:80"
+    environment:
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: root
+
+  frontend:
+    build:
+      context: ./frontend/vue-app
+      dockerfile: ../Dockerfile
+
+    container_name: vue_frontend
+
+    ports:
+      - "5173:5173"
+
+    volumes:
+      - ./frontend/vue-app:/app
+      - /app/node_modules
+
+    stdin_open: true
+    tty: true
