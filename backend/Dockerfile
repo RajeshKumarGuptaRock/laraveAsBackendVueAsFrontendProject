@@ -7,7 +7,12 @@ RUN apt-get update && apt-get install -y \
     unzip \
     git \
     curl \
-    && docker-php-ext-install pdo pdo_mysql zip
+    && docker-php-ext-install pdo pdo_mysql zip \
+    pcntl
+
+RUN pecl install redis \
+   && docker-php-ext-enable redis
+
 
 # Enable Apache rewrite
 RUN a2enmod rewrite
