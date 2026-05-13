@@ -19,9 +19,6 @@ services:
        condition: service_started
     restart: unless-stopped
 
-
-
-
   mysql:
     image: mysql:8
     container_name: laravel_mysql
@@ -53,14 +50,12 @@ services:
    ports:
      - "6379:6379"
    restart: unless-stopped
-
    
   mailhog:
    image: mailhog/mailhog
    ports:
      - "8025"
    restart: unless-stopped
-
 
   frontend:
     build:
