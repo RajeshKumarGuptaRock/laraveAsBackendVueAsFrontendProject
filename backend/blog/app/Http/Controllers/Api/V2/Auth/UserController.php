@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Auth;
+namespace App\Http\Controllers\Api\V2\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -13,16 +13,8 @@ class UserController extends Controller
     use ApiResponseTrait;
     public function __invoke(Request $request): JsonResponse
     {
-        // return response()->json([
-        //     'message' => __('User List'),
-        //     'data' => [
-        //         'user' => User::all(),
-        //     ],
-        // ], 200);
-
-
         return $this->successResponse([
-            'message' => __('User List'),
+            'message' => __('User List Here'),
 
             'token_type' => 'Bearer',
             'data' => [
