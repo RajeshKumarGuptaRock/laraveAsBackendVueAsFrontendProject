@@ -9,9 +9,11 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use App\Traits\ApiResponseTrait;
 
 class RegisterController extends Controller
 {
+    use ApiResponseTrait;
     public function __invoke(RegisterRequest $request): JsonResponse
     {
         /** @var User $user */

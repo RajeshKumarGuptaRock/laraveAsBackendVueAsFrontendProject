@@ -8,9 +8,11 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
+use App\Traits\ApiResponseTrait;
 
 class LoginController extends Controller
 {
+    use ApiResponseTrait;
     public function __invoke(LoginRequest $request): JsonResponse
     {
         /** @var User|null $user */
@@ -18,9 +20,11 @@ class LoginController extends Controller
 
         if (!$user || !Hash::check($request->password, $user->password)) {
 
-            return response()->json([
-                'message' => __('Invalid credentials'),
-            ], 401);
+            return $this->errorResponse(
+                'Invalid credentials',
+                null,
+                401
+            );
         }
 
         $token = $user->createToken('api-token')->plainTextToken;
