@@ -21,27 +21,14 @@ Route::prefix('auth')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
 
         Route::post('/logout', LogoutController::class);
+
+        Route::post('/email/resend', ResendVerificationController::class)->middleware('throttle:5,1');
+        Route::get('/email/verify/{id}/{hash}', VerifyEmailController::class)->middleware(['auth:sanctum', 'signed'])->name('verification.verify');
+
+        Route::get('/userList', UserController::class);
     });
 
     Route::post('/forgot-password', ForgotPasswordController::class);
 
     Route::post('/reset-password', ResetPasswordController::class);
-
-    Route::middleware('auth:sanctum')->group(function () {
-
-        Route::post(
-            '/email/resend',
-            ResendVerificationController::class
-        );
-    });
-
-    Route::get(
-        '/email/verify/{id}/{hash}',
-        VerifyEmailController::class
-    )->middleware(['auth:sanctum', 'signed']);
-});
-
-Route::middleware('auth:sanctum')->group(function () {
-
-    Route::get('/userList', UserController::class);
 });
