@@ -9,6 +9,7 @@ use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Log;
 
 class VerifyEmailController extends Controller
 {
@@ -19,67 +20,80 @@ class VerifyEmailController extends Controller
         int $id,
         string $hash
     ): JsonResponse {
+        try {
 
-        $user = User::find($id);
 
-        if (!$user) {
+            $user = User::find($id);
 
-            return $this->errorResponse(
-                'User not found.',
-                null,
-                404
-            );
-        }
+            if (!$user) {
 
-        /**
-         * Validate hash
-         */
-        if (!hash_equals(
-            sha1($user->getEmailForVerification()),
-            $hash
-        )) {
+                return $this->errorResponse(
+                    'User not found.',
+                    null,
+                    404
+                );
+            }
 
-            return $this->errorResponse(
-                'Invalid verification hash.',
-                null,
-                403
-            );
-        }
+            /**
+             * Validate hash
+             */
+            if (!hash_equals(
+                sha1($user->getEmailForVerification()),
+                $hash
+            )) {
 
-        /**
-         * Validate signed URL
-         */
-        if (!$request->hasValidSignature()) {
+                return $this->errorResponse(
+                    'Invalid verification hash.',
+                    null,
+                    403
+                );
+            }
 
-            return $this->errorResponse(
-                'Invalid or expired verification link.',
-                null,
-                403
-            );
-        }
+            /**
+             * Validate signed URL
+             */
+            if (!$request->hasValidSignature()) {
 
-        /**
-         * Already verified
-         */
-        if ($user->hasVerifiedEmail()) {
+                return $this->errorResponse(
+                    'Invalid or expired verification link.',
+                    null,
+                    403
+                );
+            }
+
+            /**
+             * Already verified
+             */
+            if ($user->hasVerifiedEmail()) {
+
+                return $this->successResponse(
+                    null,
+                    'Email already verified.'
+                );
+            }
+
+            /**
+             * Mark email as verified
+             */
+            if ($user->markEmailAsVerified()) {
+
+                event(new Verified($user));
+            }
 
             return $this->successResponse(
                 null,
-                'Email already verified.'
+                'Email verified successfully.'
+            );
+        } catch (\Throwable $exception) {
+            Log::error('Forgot Password Error', [
+                'message' => $exception->getMessage(),
+            ]);
+
+            return $this->errorResponse(
+                'Unable to process forgot password request.',
+                null,
+                500
             );
         }
-
-        /**
-         * Mark email as verified
-         */
-        if ($user->markEmailAsVerified()) {
-
-            event(new Verified($user));
-        }
-
-        return $this->successResponse(
-            null,
-            'Email verified successfully.'
-        );
     }
 }
