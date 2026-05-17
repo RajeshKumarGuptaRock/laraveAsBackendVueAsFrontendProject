@@ -11,53 +11,61 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use App\Http\Requests\Auth\ResetPasswordRequest;
+use Illuminate\Support\Facades\Log;
 
 class ResetPasswordController extends Controller
 {
     use ApiResponseTrait;
 
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(ResetPasswordRequest $request): JsonResponse
     {
-        $request->validate([
-            'email' => ['required', 'email'],
-            'token' => ['required'],
-            'password' => ['required', 'confirmed'],
-        ]);
+        try {
+            $status = Password::reset(
 
-        $status = Password::reset(
+                $request->only(
+                    'email',
+                    'password',
+                    'password_confirmation',
+                    'token'
+                ),
 
-            $request->only(
-                'email',
-                'password',
-                'password_confirmation',
-                'token'
-            ),
+                function (User $user, string $password) {
 
-            function (User $user, string $password) {
+                    $user->forceFill([
+                        'password' => Hash::make($password),
+                        'remember_token' => Str::random(60),
+                    ])->save();
 
-                $user->forceFill([
-                    'password' => Hash::make($password),
-                    'remember_token' => Str::random(60),
-                ])->save();
+                    $user->tokens()->delete();
 
-                $user->tokens()->delete();
+                    event(new PasswordReset($user));
+                }
+            );
 
-                event(new PasswordReset($user));
+            if ($status === Password::PASSWORD_RESET) {
+
+                return $this->successResponse(
+                    null,
+                    'Password reset successfully.'
+                );
             }
-        );
 
-        if ($status === Password::PASSWORD_RESET) {
-
-            return $this->successResponse(
+            return $this->errorResponse(
+                __($status),
                 null,
-                'Password reset successfully.'
+                422
+            );
+        } catch (\Throwable $exception) {
+            Log::error('Forgot Password Error', [
+                'message' => $exception->getMessage(),
+            ]);
+
+            return $this->errorResponse(
+                'Unable to process forgot password request.',
+                null,
+                500
             );
         }
-
-        return $this->errorResponse(
-            __($status),
-            null,
-            422
-        );
     }
 }
