@@ -3,97 +3,17 @@
 namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Traits\ApiResponseTrait;
-use Illuminate\Auth\Events\Verified;
+use App\Services\Auth\VerifyEmailService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Facades\Log;
 
 class VerifyEmailController extends Controller
 {
-    use ApiResponseTrait;
-
     public function __invoke(
         Request $request,
-        int $id,
-        string $hash
+        VerifyEmailService $service
     ): JsonResponse {
-        try {
 
-
-            $user = User::find($id);
-
-            if (!$user) {
-
-                return $this->errorResponse(
-                    'User not found.',
-                    null,
-                    404
-                );
-            }
-
-            /**
-             * Validate hash
-             */
-            if (!hash_equals(
-                sha1($user->getEmailForVerification()),
-                $hash
-            )) {
-
-                return $this->errorResponse(
-                    'Invalid verification hash.',
-                    null,
-                    403
-                );
-            }
-
-            /**
-             * Validate signed URL
-             */
-            if (!$request->hasValidSignature()) {
-
-                return $this->errorResponse(
-                    'Invalid or expired verification link.',
-                    null,
-                    403
-                );
-            }
-
-            /**
-             * Already verified
-             */
-            if ($user->hasVerifiedEmail()) {
-
-                return $this->successResponse(
-                    null,
-                    'Email already verified.'
-                );
-            }
-
-            /**
-             * Mark email as verified
-             */
-            if ($user->markEmailAsVerified()) {
-
-                event(new Verified($user));
-            }
-
-            return $this->successResponse(
-                null,
-                'Email verified successfully.'
-            );
-        } catch (\Throwable $exception) {
-            Log::error('Forgot Password Error', [
-                'message' => $exception->getMessage(),
-            ]);
-
-            return $this->errorResponse(
-                'Unable to process forgot password request.',
-                null,
-                500
-            );
-        }
+        return $service->verifyEmail($request);
     }
 }
