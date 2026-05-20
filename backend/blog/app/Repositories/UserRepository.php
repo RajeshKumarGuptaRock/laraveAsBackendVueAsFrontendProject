@@ -7,8 +7,6 @@ use App\Repositories\Contracts\UserRepositoryInterface;
 
 class UserRepository extends BaseRepository implements UserRepositoryInterface
 {
-    protected User $model;
-
     public function __construct(User $user)
     {
         $this->model = $user;
