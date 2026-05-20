@@ -20,13 +20,14 @@ Route::prefix('auth')->group(function () {
 
         Route::post('/logout', LogoutController::class);
 
-        Route::post('/email/resend', ResendVerificationController::class)->middleware('throttle:5,1');
-        Route::get('/email/verify/{id}/{hash}', VerifyEmailController::class)->middleware(['auth:sanctum', 'signed']);
+
 
         Route::get('/userList', UserController::class)->middleware('throttle:5,1');
     });
 
-    Route::post('/forgot-password', ForgotPasswordController::class)->middleware('throttle:5,1');
+    Route::post('/email/resend', ResendVerificationController::class)->middleware('throttle:5,1');
+    Route::get('/email/verify/{id}/{hash}', VerifyEmailController::class);
 
+    Route::post('/forgot-password', ForgotPasswordController::class)->middleware('throttle:5,1');
     Route::post('/reset-password', ResetPasswordController::class)->middleware('throttle:5,1');
 });
