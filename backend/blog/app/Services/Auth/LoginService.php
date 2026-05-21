@@ -22,14 +22,15 @@ class LoginService
             /** @var User|null $user */
             $user = $this->userRepository
                 ->findByEmail($data['email']);
-            // if (!$user->hasVerifiedEmail()) {
 
-            //     return $this->errorResponse(
-            //         __('Please verify your email address.'),
-            //         null,
-            //         403
-            //     );
-            // }
+            // Optional check verification of email during login
+            if (!$user->hasVerifiedEmail()) {
+                return $this->errorResponse(
+                    __('Please verify your email address.'),
+                    null,
+                    403
+                );
+            }
 
 
             if (!$user || !Hash::check($data['password'], $user->password)) {

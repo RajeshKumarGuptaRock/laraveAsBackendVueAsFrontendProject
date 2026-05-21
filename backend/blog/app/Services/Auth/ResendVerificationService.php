@@ -57,14 +57,12 @@ class ResendVerificationService
                 'expires_in_minutes' => 60,
             ], 'Verification email sent successfully.');
         } catch (\Throwable $exception) {
-            Log::error('Forgot Password Error', [
+            Log::error('Verification Error', [
                 'message' => $exception->getMessage(),
             ]);
 
-
-
             return $this->errorResponse(
-                'Unable to process forgot password request.',
+                'Unable to process Resend Verification request.',
                 null,
                 500
             );

@@ -17,16 +17,12 @@ Route::prefix('auth')->group(function () {
     Route::post('/login', LoginController::class)->middleware('throttle:5,1');
 
     Route::middleware('auth:sanctum')->group(function () {
-
         Route::post('/logout', LogoutController::class);
-
-
-
         Route::get('/userList', UserController::class)->middleware('throttle:5,1');
     });
 
     Route::post('/email/resend', ResendVerificationController::class)->middleware('throttle:5,1');
-    Route::get('/email/verify/{id}/{hash}', VerifyEmailController::class);
+    Route::get('/email/verify/{id}/{hash}', VerifyEmailController::class)->middleware('throttle:5,1')->name('verification.verify');
 
     Route::post('/forgot-password', ForgotPasswordController::class)->middleware('throttle:5,1');
     Route::post('/reset-password', ResetPasswordController::class)->middleware('throttle:5,1');
